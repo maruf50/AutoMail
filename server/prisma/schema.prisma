@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id              String   @id @default(cuid())
+  name            String
+  subject         String
+  senderName      String?
+  senderEmail     String
+  message         String
+  intervalSeconds Int
+  status          String   @default("draft")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  recipients Recipient[]
+}
+
+model Recipient {
+  id           String    @id @default(cuid())
+  email        String
+  name         String?
+  status       String    @default("pending")
+  errorMessage String?
+  sentAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, email])
+}
